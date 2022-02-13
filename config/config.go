@@ -7,8 +7,8 @@ import (
 )
 
 type Config struct {
-	InitialBalanceAmount string `json:"initialBalanceAmount"`
-	MinumumBalanceAmount int    `json:"minumumBalanceAmount"`
+	InitialBalanceAmount int `json:"initialBalanceAmount"`
+	MinumumBalanceAmount int `json:"minumumBalanceAmount"`
 }
 
 var C = &Config{}

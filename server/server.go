@@ -19,7 +19,7 @@ func (s *Server) StartServer(port int) error {
 	userService := service.NewUserService(userRepository)
 	userHandler := handler.NewUserHandler(userService)
 
-	http.HandleFunc("/", userHandler.GetUsers)
+	http.HandleFunc("/", userHandler.User)
 
 	err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 	return err

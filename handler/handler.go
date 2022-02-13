@@ -7,30 +7,68 @@ import (
 )
 
 type IHandler interface {
-	GetUsers(writer http.ResponseWriter, request *http.Request)
+	User(writer http.ResponseWriter, request *http.Request)
 }
 
 type Handler struct {
 	service service.IUserService
 }
 
-func (h Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		w.WriteHeader(http.StatusNotImplemented)
-		return
+func (h Handler) User(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == http.MethodGet {
+		username := r.URL.Query().Get("username")
+
+		// Get Users
+		if username == "" {
+			users, err := h.service.GetUsers()
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+
+			userBytes, _ := json.Marshal(users)
+			w.Header().Add("content-type", "application/json; charset=UTF-8")
+			w.WriteHeader(http.StatusOK)
+			w.Write(userBytes)
+
+			// Get User
+		} else {
+			user, err := h.service.GetUser(r)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			userBytes, _ := json.Marshal(user)
+			w.Header().Add("content-type", "application/json; charset=UTF-8")
+			w.WriteHeader(http.StatusOK)
+			w.Write(userBytes)
+		}
+
+		// Put User
+	} else if r.Method == http.MethodPut {
+		user, err := h.service.PutUser(r)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		userBytes, _ := json.Marshal(user)
+		w.Header().Add("content-type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+		w.Write(userBytes)
+
+		// Post User
+	} else if r.Method == http.MethodPost {
+		user, err := h.service.PostUser(r)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		userBytes, _ := json.Marshal(user)
+		w.Header().Add("content-type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+		w.Write(userBytes)
 	}
-
-	products, err := h.service.Users()
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	productsBytes, _ := json.Marshal(products)
-
-	w.Header().Add("content-type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-	w.Write(productsBytes)
 }
 
 func NewUserHandler(service service.IUserService) IHandler {
